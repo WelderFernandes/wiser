@@ -349,7 +349,7 @@ export default function SignInForm() {
             <CardFooter className="flex justify-center">
               <p className="text-sm text-muted-foreground">
                 Não tem uma conta?{' '}
-                <Link href="/signup" className="text-primary hover:underline">
+                <Link href="/sign-up" className="text-primary hover:underline">
                   Cadastre-se
                 </Link>
               </p>

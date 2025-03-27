@@ -1,5 +1,5 @@
-import type React from 'react'
-import { type InputHTMLAttributes, forwardRef } from 'react'
+'use client'
+import { type InputHTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { LucideIcon } from 'lucide-react'
+
+import { ReactNode } from 'react'
 
 export interface SelectOption {
   value: string
@@ -21,7 +22,7 @@ export interface DynamicInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   type?: string | 'select'
   label?: string
-  icon?: LucideIcon
+  icon?: ReactNode
   iconPosition?: 'start' | 'end'
   error?: string
   containerClassName?: string
@@ -32,11 +33,7 @@ export interface DynamicInputProps
   onValueChange?: (value: string) => void
 }
 
-const DynamicInput = forwardRef<
-  HTMLInputElement | HTMLSelectElement,
-  DynamicInputProps
->(
-  (
+export function DynamicInput(
     {
       label,
       type = 'text',
@@ -53,9 +50,8 @@ const DynamicInput = forwardRef<
       onChange,
       onValueChange,
       ...props
-    },
-    ref,
-  ) => {
+    }: DynamicInputProps,
+  ) {
     const inputClasses = cn(
       'flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
       Icon && iconPosition === 'start' && 'pl-10',
@@ -68,11 +64,11 @@ const DynamicInput = forwardRef<
     const iconComponent = Icon && (
       <div
         className={cn(
-          'absolute inset-y-0 flex items-center pointer-events-none',
+          'absolute inset-y-0 flex items-center pointer-events-none text-muted-foreground',
           iconPosition === 'start' ? 'left-3' : 'right-3',
         )}
       >
-        <Icon className="w-5 h-5 text-muted-foreground" />
+        {Icon}
       </div>
     )
 
@@ -112,7 +108,6 @@ const DynamicInput = forwardRef<
           ) : (
             <>
               <Input
-                ref={ref as React.Ref<HTMLInputElement>}
                 type={type}
                 className={inputClasses}
                 value={value}
@@ -137,9 +132,5 @@ const DynamicInput = forwardRef<
         )}
       </div>
     )
-  },
-)
+  }
 
-DynamicInput.displayName = 'DynamicInput'
-
-export { DynamicInput }
