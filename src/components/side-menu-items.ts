@@ -1,13 +1,13 @@
-import { Home, SquareTerminal, TestTube } from 'lucide-react'
+import { Calendar, Home, SquareTerminal } from 'lucide-react'
 
 export const mainItems = [
   {
     groupName: 'Main',
     items: [
       {
-        title: 'Teste',
-        url: '/teste',
-        icon: TestTube,
+        title: 'Agenda',
+        url: '/calendar',
+        icon: Calendar,
       },
       {
         title: 'Playground',
