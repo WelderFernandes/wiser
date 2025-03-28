@@ -43,7 +43,7 @@ export function EventList({ events, onDelete }: EventListProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 0.3, delay: index * 0.1 }}
-            className="glass-effect p-4 rounded-xl event-card"
+            className="p-4 rounded-md bg-card border-accent-foreground/10 border"
           >
             <div className="flex justify-between items-start">
               <h4 className="font-medium text-lg">{event.title}</h4>

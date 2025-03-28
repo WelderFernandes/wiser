@@ -148,6 +148,13 @@ export default function Calendario() {
                 <h3 className="text-xl font-medium capitalize">
                   {formattedSelectedDate}
                 </h3>
+                <Button
+                  onClick={() => setIsAddingEvent(true)}
+                  size="icon"
+                  // className="gap-1 right-0 add-event-button rounded-full px-4 text-white border-none bottom-0 mb-4 mr-4"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
 
               <div className="mt-6">
@@ -166,13 +173,6 @@ export default function Calendario() {
                 </AnimatePresence>
               </div>
             </div>
-            <Button
-              onClick={() => setIsAddingEvent(true)}
-              size="icon"
-              className="gap-1 add-event-button rounded-full px-4 text-white border-none right-0 bottom-0 mb-4 mr-4"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
           </Card>
         </motion.div>
       </div>
