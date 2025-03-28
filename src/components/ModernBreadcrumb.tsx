@@ -206,7 +206,7 @@ const EnhancedBreadcrumb = ({
                 )
               })}
             </BreadcrumbList>
-          </Breadcrumb>
+        </Breadcrumb>
       </Card>
     </TooltipProvider>
   )

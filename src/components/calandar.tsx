@@ -31,7 +31,7 @@ export default function Calendario() {
 
   return (
     <div className="w-full mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1  lg:grid-cols-3 gap-6">
         {/* Calendário */}
 
         <motion.div
@@ -42,7 +42,7 @@ export default function Calendario() {
         >
           <Card className="rounded-xl ">
             <CardContent>
-              <div className="flex justify-between items-center ">
+              <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-3xl font-bold capitalize calendar-header bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
                     {monthName} de {currentYear}
@@ -52,7 +52,7 @@ export default function Calendario() {
                     {totalEventsThisMonth} eventos este mês
                   </p>
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex space-x-3 ">
                   <Button
                     variant="outline"
                     size="icon"
@@ -78,7 +78,7 @@ export default function Calendario() {
                 {daysOfWeek.map((day, index) => (
                   <div
                     key={index}
-                    className="text-center py-2 mt-6 text-sm font-medium text-muted-foreground"
+                    className="text-center max-w-2/3  py-2 mt-6 text-sm font-medium text-muted-foreground"
                   >
                     {day}
                   </div>
@@ -102,7 +102,7 @@ export default function Calendario() {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedDate(day.date)}
                       className={cn(
-                        'aspect-square flex flex-col items-center justify-center rounded-xl relative hover:bg-primary/10 ring-accent ring-1',
+                        'aspect-square max-w-2/3 flex flex-col items-center justify-center rounded-xl relative hover:bg-primary/10 ring-accent ring-1',
                         !day.isCurrentMonth && 'text-muted-foreground/50',
                         isSelected && 'selected-day',
                         isToday && !isSelected && 'today-marker',
