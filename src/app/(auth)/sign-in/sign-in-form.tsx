@@ -31,7 +31,11 @@ import { AuthError } from 'next-auth'
 export type LoginFormValues = z.infer<typeof signInFormSchema>
 
 // Componente que lida com parâmetros de busca
-function SearchParamsHandler({ children }: { children: (error: string | null) => React.ReactNode }) {
+function SearchParamsHandler({
+  children,
+}: {
+  children: (error: string | null) => React.ReactNode
+}) {
   const searchParams = useSearchParams()
   const [authError, setAuthError] = useState<string | null>(null)
 
@@ -194,7 +198,7 @@ export default function SignInForm() {
 
   const renderForm = (urlAuthError: string | null) => {
     // Combinamos os erros de URL com os erros do estado local
-    const currentAuthError = authError || urlAuthError;
+    const currentAuthError = authError || urlAuthError
 
     return (
       <motion.div>
@@ -359,8 +363,8 @@ export default function SignInForm() {
 
         <Toaster />
       </motion.div>
-    );
-  };
+    )
+  }
 
   return (
     <Suspense fallback={<div>Carregando...</div>}>
@@ -368,5 +372,5 @@ export default function SignInForm() {
         {(urlAuthError) => renderForm(urlAuthError)}
       </SearchParamsHandler>
     </Suspense>
-  );
+  )
 }

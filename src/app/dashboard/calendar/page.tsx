@@ -1,9 +1,9 @@
 'use client'
-import Calendario from '@/components/calandar'
+import Calendar from '@/components/calendar/calendar'
 import EnhancedBreadcrumb, {
   BreadcrumbItemType,
 } from '@/components/ModernBreadcrumb'
-import { Calendar, Home } from 'lucide-react'
+import { Calendar1Icon, Home } from 'lucide-react'
 
 export default function Page() {
   const navigationItems: BreadcrumbItemType[] = [
@@ -16,7 +16,7 @@ export default function Page() {
     {
       label: 'Agenda',
       href: '/shedule',
-      icon: Calendar,
+      icon: Calendar1Icon,
       description: 'Ver todos os produtos',
     },
   ]
@@ -27,7 +27,8 @@ export default function Page() {
         variant="expanded"
         maxItems={5}
       />
-      <Calendario />
+      {/* <Calendario /> */}
+      <Calendar />
     </>
   )
 }

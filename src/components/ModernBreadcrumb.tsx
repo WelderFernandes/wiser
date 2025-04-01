@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react'
 import { ChevronRight, ChevronDown, MoreHorizontal } from 'lucide-react'
 import {
