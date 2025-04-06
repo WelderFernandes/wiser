@@ -2,20 +2,21 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { Meeting } from "@/lib/types"
+import type { Service, ServiceProvider } from "@/lib/types"
 import { generateRandomColor } from "./calendar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet"
 
-interface EditMeetingModalProps {
-  meeting: Meeting
+interface EditServiceModalProps {
+  service: Service
   open: boolean
   onClose: () => void
-  onSave: (meeting: Meeting) => void
+  onSave: (service: Service) => void
+  providers?: ServiceProvider[]
 }
 
 // Lista de cores predefinidas para seleção
@@ -32,16 +33,44 @@ const colorOptions = [
   { value: "#33FFFF", label: "Ciano" },
 ]
 
-export default function EditMeetingModal({ meeting, open, onClose, onSave }: EditMeetingModalProps) {
+// Lista de tipos de serviço
+const serviceTypes = [
+  "Corte de Cabelo",
+  "Barba",
+  "Coloração",
+  "Manicure",
+  "Pedicure",
+  "Depilação",
+  "Massagem",
+  "Limpeza de Pele",
+  "Maquiagem",
+  "Tratamento Capilar",
+]
+
+export default function EditServiceModal({ service, open, onClose, onSave, providers = [] }: EditServiceModalProps) {
   // Adicionar validação para impedir hora de término inferior à hora de início
-  const [startTime, setStartTime] = useState(meeting.startTime.toTimeString().split(" ")[0].substring(0, 5))
-  const [endTime, setEndTime] = useState(meeting.endTime.toTimeString().split(" ")[0].substring(0, 5))
+  const [startTime, setStartTime] = useState(service.startTime.toTimeString().split(" ")[0].substring(0, 5))
+  const [endTime, setEndTime] = useState(service.endTime.toTimeString().split(" ")[0].substring(0, 5))
   const [timeError, setTimeError] = useState<string | null>(null)
-  const [title, setTitle] = useState(meeting.title)
-  const [description, setDescription] = useState(meeting.description)
-  const [date, setDate] = useState(meeting.startTime.toISOString().split("T")[0])
-  const [meetingType, setMeetingType] = useState<"google" | "zoom" | "teams">(meeting.meetingType)
-  const [color, setColor] = useState<string>(meeting.color || generateRandomColor())
+  const [title, setTitle] = useState(service.title)
+  const [description, setDescription] = useState(service.description)
+  const [date, setDate] = useState(service.startTime.toISOString().split("T")[0])
+  const [serviceType, setServiceType] = useState<string>(service.serviceType)
+  const [providerId, setProviderId] = useState<string>(service.provider.id)
+  const [clientName, setClientName] = useState(service.client.name)
+  const [clientEmail, setClientEmail] = useState(service.client.email)
+  const [color, setColor] = useState<string>(service.color || generateRandomColor())
+  const [status, setStatus] = useState<"scheduled" | "completed" | "canceled">(service.status)
+
+  // Carregar os provedores disponíveis
+  useEffect(() => {
+    if (providers.length === 0) return
+
+    // Se o provedor atual não estiver na lista, selecione o primeiro
+    if (!providers.some((p) => p.id === providerId)) {
+      setProviderId(providers[0].id)
+    }
+  }, [providers, providerId])
 
   // Modificar a função que atualiza o horário de término
   const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,19 +116,29 @@ export default function EditMeetingModal({ meeting, open, onClose, onSave }: Edi
     const dayOfWeek = startDate.getDay()
     const day = dayOfWeek === 0 ? 7 : dayOfWeek
 
-    // Atualizar reunião
-    const updatedMeeting: Meeting = {
-      ...meeting,
+    // Encontrar o prestador selecionado
+    const provider = providers.find((p) => p.id === providerId) || service.provider
+
+    // Atualizar serviço
+    const updatedService: Service = {
+      ...service,
       title,
       description,
       startTime: startDate,
       endTime: endDate,
       day,
-      meetingType,
+      serviceType,
+      provider,
       color,
+      status,
+      client: {
+        ...service.client,
+        name: clientName,
+        email: clientEmail,
+      },
     }
 
-    onSave(updatedMeeting)
+    onSave(updatedService)
     onClose()
   }
 
@@ -107,7 +146,7 @@ export default function EditMeetingModal({ meeting, open, onClose, onSave }: Edi
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader className="mb-4">
-          <SheetTitle>Editar Reunião</SheetTitle>
+          <SheetTitle>Editar Serviço</SheetTitle>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
@@ -119,20 +158,104 @@ export default function EditMeetingModal({ meeting, open, onClose, onSave }: Edi
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Título da reunião"
+              placeholder="Título do serviço"
               required
             />
           </div>
 
           <div className="space-y-2">
+            <label htmlFor="serviceType" className="text-sm font-medium">
+              Tipo de Serviço
+            </label>
+            <Select value={serviceType} onValueChange={setServiceType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o tipo de serviço" />
+              </SelectTrigger>
+              <SelectContent>
+                {serviceTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {providers.length > 0 && (
+            <div className="space-y-2">
+              <label htmlFor="provider" className="text-sm font-medium">
+                Prestador de Serviço
+              </label>
+              <Select value={providerId} onValueChange={setProviderId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o prestador" />
+                </SelectTrigger>
+                <SelectContent>
+                  {providers.map((provider) => (
+                    <SelectItem key={provider.id} value={provider.id}>
+                      {provider.name} - {provider.role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <label htmlFor="clientName" className="text-sm font-medium">
+              Nome do Cliente
+            </label>
+            <Input
+              id="clientName"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              placeholder="Nome do cliente"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="clientEmail" className="text-sm font-medium">
+              Email do Cliente
+            </label>
+            <Input
+              id="clientEmail"
+              type="email"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
+              placeholder="Email do cliente"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="status" className="text-sm font-medium">
+              Status
+            </label>
+            <Select
+              value={status}
+              onValueChange={(value) => setStatus(value as "scheduled" | "completed" | "canceled")}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="scheduled">Agendado</SelectItem>
+                <SelectItem value="completed">Concluído</SelectItem>
+                <SelectItem value="canceled">Cancelado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="description" className="text-sm font-medium">
-              Descrição
+              Observações
             </label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Descrição da reunião"
+              placeholder="Observações sobre o serviço"
               rows={3}
             />
           </div>
@@ -172,24 +295,8 @@ export default function EditMeetingModal({ meeting, open, onClose, onSave }: Edi
           {timeError && <div className="text-red-500 text-sm mt-1">{timeError}</div>}
 
           <div className="space-y-2">
-            <label htmlFor="meetingType" className="text-sm font-medium">
-              Tipo de Reunião
-            </label>
-            <Select value={meetingType} onValueChange={(value) => setMeetingType(value as "google" | "zoom" | "teams")}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo de reunião" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="google">Google Meet</SelectItem>
-                <SelectItem value="zoom">Zoom</SelectItem>
-                <SelectItem value="teams">Microsoft Teams</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
             <label htmlFor="color" className="text-sm font-medium">
-              Cor do Evento
+              Cor do Serviço
             </label>
             <Select value={color} onValueChange={setColor}>
               <SelectTrigger>

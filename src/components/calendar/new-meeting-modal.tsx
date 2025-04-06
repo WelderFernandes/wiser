@@ -3,16 +3,16 @@
 import type React from "react"
 
 import { useState } from "react"
-import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { Meeting } from "@/lib/types"
 import { generateRandomColor } from "./calendar"
-import { Meeting } from "@/lib/types"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet"
 
 interface NewMeetingModalProps {
+  open: boolean
   onClose: () => void
   onSave: (meeting: Meeting) => void
   currentDate: Date
@@ -32,17 +32,52 @@ const colorOptions = [
   { value: "#33FFFF", label: "Ciano" },
 ]
 
-export default function NewMeetingModal({ onClose, onSave, currentDate }: NewMeetingModalProps) {
+export default function NewMeetingModal({ open, onClose, onSave, currentDate }: NewMeetingModalProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [date, setDate] = useState(currentDate.toISOString().split("T")[0])
+  // Adicionar validação para impedir hora de término inferior à hora de início
   const [startTime, setStartTime] = useState("09:00")
   const [endTime, setEndTime] = useState("10:00")
+  const [timeError, setTimeError] = useState<string | null>(null)
   const [meetingType, setMeetingType] = useState<"google" | "zoom" | "teams">("google")
   const [color, setColor] = useState<string>(generateRandomColor())
 
+  // Modificar a função que atualiza o horário de término
+  const handleEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEndTime = e.target.value
+    setEndTime(newEndTime)
+
+    // Validar se o horário de término é posterior ao de início
+    if (newEndTime < startTime) {
+      setTimeError("O horário de término deve ser posterior ao horário de início")
+    } else {
+      setTimeError(null)
+    }
+  }
+
+  // Modificar a função que atualiza o horário de início
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStartTime = e.target.value
+    setStartTime(newStartTime)
+
+    // Validar se o horário de término é posterior ao de início
+    if (endTime < newStartTime) {
+      setTimeError("O horário de término deve ser posterior ao horário de início")
+    } else {
+      setTimeError(null)
+    }
+  }
+
+  // Modificar o handleSubmit para verificar se há erros antes de salvar
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Verificar se há erros de validação
+    if (endTime < startTime) {
+      setTimeError("O horário de término deve ser posterior ao horário de início")
+      return
+    }
 
     // Criar objetos de data de início e fim
     const startDate = new Date(`${date}T${startTime}:00`)
@@ -74,14 +109,25 @@ export default function NewMeetingModal({ onClose, onSave, currentDate }: NewMee
     }
 
     onSave(newMeeting)
+    resetForm()
+  }
+
+  const resetForm = () => {
+    setTitle("")
+    setDescription("")
+    setDate(currentDate.toISOString().split("T")[0])
+    setStartTime("09:00")
+    setEndTime("10:00")
+    setMeetingType("google")
+    setColor(generateRandomColor())
   }
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Criar Nova Reunião</DialogTitle>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onClose}>
+      <SheetContent className="sm:max-w-md overflow-y-auto">
+        <SheetHeader className="mb-4">
+          <SheetTitle>Criar Nova Reunião</SheetTitle>
+        </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
@@ -117,28 +163,31 @@ export default function NewMeetingModal({ onClose, onSave, currentDate }: NewMee
             <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
           </div>
 
+          {/* Atualizar os inputs de hora no formulário */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label htmlFor="startTime" className="text-sm font-medium">
                 Hora de Início
               </label>
-              <Input
-                id="startTime"
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                required
-              />
+              <Input id="startTime" type="time" value={startTime} onChange={handleStartTimeChange} required />
             </div>
 
             <div className="space-y-2">
               <label htmlFor="endTime" className="text-sm font-medium">
                 Hora de Término
               </label>
-              <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
+              <Input
+                id="endTime"
+                type="time"
+                value={endTime}
+                onChange={handleEndTimeChange}
+                required
+                className={timeError ? "border-red-500" : ""}
+              />
             </div>
           </div>
-
+          {/* Exibir mensagem de erro se houver */}
+          {timeError && <div className="text-red-500 text-sm mt-1">{timeError}</div>}
           <div className="space-y-2">
             <label htmlFor="meetingType" className="text-sm font-medium">
               Tipo de Reunião
@@ -181,15 +230,17 @@ export default function NewMeetingModal({ onClose, onSave, currentDate }: NewMee
             </Select>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancelar
-            </Button>
+          <SheetFooter className="pt-4 flex flex-row gap-2 justify-end">
+            <SheetClose asChild>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </SheetClose>
             <Button type="submit">Criar Reunião</Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }
 

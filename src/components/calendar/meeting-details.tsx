@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { X, Clock, Users, ChevronRight, Trash2, Edit } from "lucide-react"
+import { Clock, Users, ChevronRight, Trash2, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -16,19 +16,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
+import type { Meeting } from "@/lib/types"
 import EditMeetingModal from "./edit-meeting-modal"
 import { motion } from "framer-motion"
-import { Meeting } from "@/lib/types"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
 
 interface MeetingDetailsProps {
   meeting: Meeting
+  open: boolean
   onClose: () => void
   onDelete: (meetingId: string) => void
   onUpdate: (meeting: Meeting) => void
 }
 
-export default function MeetingDetails({ meeting, onClose, onDelete, onUpdate }: MeetingDetailsProps) {
+export default function MeetingDetails({ meeting, open, onClose, onDelete, onUpdate }: MeetingDetailsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false)
   const [showEditModal, setShowEditModal] = useState<boolean>(false)
 
@@ -61,9 +62,16 @@ export default function MeetingDetails({ meeting, onClose, onDelete, onUpdate }:
     return `${formatTime(start)} - ${formatTime(end)}`
   }
 
+  // Corrigir a função de exclusão para fechar o drawer antes de excluir o evento
   const handleDelete = (): void => {
-    onDelete(meeting.id)
-    setShowDeleteDialog(false)
+    // Primeiro fechar o drawer para evitar problemas de UI
+    onClose()
+
+    // Usar setTimeout para garantir que o drawer seja fechado antes da exclusão
+    setTimeout(() => {
+      onDelete(meeting.id)
+      setShowDeleteDialog(false)
+    }, 300)
   }
 
   // Obter estilo para o evento com base na cor personalizada
@@ -96,101 +104,102 @@ export default function MeetingDetails({ meeting, onClose, onDelete, onUpdate }:
 
   return (
     <>
-      <div className="border-l border-border bg-background flex flex-col h-full">
-        {/* Header */}
-        <div className="p-4 border-b border-border flex justify-between items-start">
-          <div>
-            <h2 className="text-lg font-semibold">{meeting.title}</h2>
-            <p className="text-sm text-muted-foreground">
-              {formatDate(meeting.startTime)} · Semana {getWeekNumber(meeting.startTime)}
-            </p>
-            <div className="mt-1 text-sm">{formatTimeRange(meeting.startTime, meeting.endTime)}</div>
-            <div className="mt-1 text-xs text-muted-foreground">Duração: {getMeetingDuration()}</div>
-          </div>
-          <div className="flex space-x-1">
-            <Button variant="ghost" size="icon" onClick={() => setShowEditModal(true)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setShowDeleteDialog(true)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+      <Sheet open={open} onOpenChange={onClose}>
+        <SheetContent className="sm:max-w-md overflow-y-auto">
+          {/* Header */}
+          <SheetHeader className="border-b border-border pb-4 mb-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <SheetTitle className="text-lg font-semibold">{meeting.title}</SheetTitle>
+                <p className="text-sm text-muted-foreground">
+                  {formatDate(meeting.startTime)} · Semana {getWeekNumber(meeting.startTime)}
+                </p>
+                <div className="mt-1 text-sm">{formatTimeRange(meeting.startTime, meeting.endTime)}</div>
+                <div className="mt-1 text-xs text-muted-foreground">Duração: {getMeetingDuration()}</div>
+              </div>
+              <div className="flex space-x-1">
+                <Button variant="ghost" size="icon" onClick={() => setShowEditModal(true)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </SheetHeader>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4 space-y-6">
-          {/* Propose new time */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Propor novo horário</span>
-            <Button variant="ghost" size="sm" className="h-8">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Attendees */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium mb-2">Participantes ({meeting.attendees.length})</h3>
-            {meeting.attendees.map((attendee, index) => (
-              <motion.div
-                key={attendee.id}
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: index * 0.05 }}
-              >
-                <Avatar>
-                  <AvatarImage src={attendee.avatar} alt={attendee.name} />
-                  <AvatarFallback>{getInitials(attendee.name)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-medium">{attendee.name}</div>
-                  <div className="text-xs text-muted-foreground">{attendee.email}</div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Join button */}
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button className="w-full border-l-4" style={getMeetingStyle()}>
-              Entrar na reunião de{" "}
-              {meeting.meetingType === "google" ? "Google Meet" : meeting.meetingType === "zoom" ? "Zoom" : "Teams"}
-            </Button>
-          </motion.div>
-
-          {/* Meeting details */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Lembrete: 30min antes</span>
+          {/* Content */}
+          <div className="space-y-6">
+            {/* Propose new time */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Propor novo horário</span>
+              <Button variant="ghost" size="sm" className="h-8">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{meeting.attendees.length} pessoas • 1 sim</span>
+            {/* Attendees */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium mb-2">Participantes ({meeting.attendees.length})</h3>
+              {meeting.attendees.map((attendee, index) => (
+                <motion.div
+                  key={attendee.id}
+                  className="flex items-center gap-3"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.05 }}
+                >
+                  <Avatar>
+                    <AvatarImage src={attendee.avatar} alt={attendee.name} />
+                    <AvatarFallback>{getInitials(attendee.name)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">{attendee.name}</div>
+                    <div className="text-xs text-muted-foreground">{attendee.email}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Join button */}
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button className="w-full border-l-4" style={getMeetingStyle()}>
+                Entrar na reunião de{" "}
+                {meeting.meetingType === "google" ? "Google Meet" : meeting.meetingType === "zoom" ? "Zoom" : "Teams"}
+              </Button>
+            </motion.div>
+
+            {/* Meeting details */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Lembrete: 30min antes</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{meeting.attendees.length} pessoas • 1 sim</span>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Notas do Organizador</h3>
+              <p className="text-sm">{meeting.description}</p>
             </div>
           </div>
 
-          {/* Notes */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Notas do Organizador</h3>
-            <p className="text-sm">{meeting.description}</p>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-border flex justify-between">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="outline">Sim</Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button variant="outline">Não</Button>
-          </motion.div>
-        </div>
-      </div>
+          {/* Footer */}
+          <SheetFooter className="border-t border-border mt-6 pt-4 flex flex-row justify-between">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="outline">Sim</Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="outline">Não</Button>
+            </motion.div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
@@ -208,7 +217,12 @@ export default function MeetingDetails({ meeting, onClose, onDelete, onUpdate }:
 
       {/* Edit Meeting Modal */}
       {showEditModal && (
-        <EditMeetingModal meeting={meeting} onClose={() => setShowEditModal(false)} onSave={onUpdate} />
+        <EditMeetingModal
+          meeting={meeting}
+          open={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSave={onUpdate}
+        />
       )}
     </>
   )
