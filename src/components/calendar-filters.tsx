@@ -65,8 +65,8 @@ export function CalendarFilters({
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-0">
-            <Command>
+          <PopoverContent className="w-[200px] p-0 ">
+            <Command className="bg-background">
               <CommandInput placeholder="Buscar colaborador..." />
               <CommandList>
                 <CommandEmpty>Nenhum colaborador encontrado.</CommandEmpty>
@@ -107,13 +107,15 @@ export function CalendarFilters({
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[200px] p-0">
-            <Command>
+            <Command className="bg-background">
               <CommandInput placeholder="Buscar paciente..." />
-              <CommandList>
+              <CommandList >
                 <CommandEmpty>Nenhum paciente encontrado.</CommandEmpty>
-                <CommandGroup>
+                <CommandGroup >
                   {patients.map((patient) => (
-                    <CommandItem key={patient.id} value={patient.id} onSelect={() => togglePatient(patient.id)}>
+                    <CommandItem
+                    className="data-[selected=true]:bg-primary/50"
+                     key={patient.id} value={patient.id} onSelect={() => togglePatient(patient.id)}>
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4",

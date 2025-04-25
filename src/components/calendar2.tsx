@@ -11,11 +11,11 @@ import {
 import { CalendarFilters } from './calendar-filters'
 import { CalendarHeader } from './calendar-header'
 import { CalendarView } from './calendar-view'
-import { useHolidays } from './calendar/holiday-service'
 import { EventDetails } from './event-details'
 import { EventModal } from './event-modal'
 import { Sidebar } from './sidebar-calendar'
 import { Card } from './ui/card'
+import { useHolidays } from '@/hooks/use-holidays'
 
 // Dados de exemplo para colaboradores
 const sampleCollaborators: Collaborator[] = [
@@ -64,6 +64,20 @@ const samplePatients: Patient[] = [
   },
   {
     id: '4',
+    name: 'Roberto Almeida',
+    email: 'roberto.almeida@exemplo.com',
+    phone: '(11) 92345-6789',
+    avatar: '/placeholder.svg?height=40&width=40',
+  },
+  {
+    id: '5',
+    name: 'Roberto Almeida',
+    email: 'roberto.almeida@exemplo.com',
+    phone: '(11) 92345-6789',
+    avatar: '/placeholder.svg?height=40&width=40',
+  },
+  {
+    id: '6',
     name: 'Roberto Almeida',
     email: 'roberto.almeida@exemplo.com',
     phone: '(11) 92345-6789',

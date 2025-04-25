@@ -65,7 +65,7 @@ export function UpcomingEvents({ events, onSelectEvent, onNavigateToDate }: Upco
   const getEventColor = (type: string) => {
     switch (type) {
       case "event":
-        return "bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500"
+        return "bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 "
       case "reminder":
         return "bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500"
       case "task":
@@ -124,7 +124,7 @@ export function UpcomingEvents({ events, onSelectEvent, onNavigateToDate }: Upco
         />
       </div>
 
-      <div className="space-y-3 mt-2 overflow-hidden">
+      <div className="space-y-3 p-1 overflow-hidden">
         <AnimatePresence>
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event, index) => (
@@ -137,7 +137,7 @@ export function UpcomingEvents({ events, onSelectEvent, onNavigateToDate }: Upco
                 whileHover={{
                   scale: 1.02,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  transition: { duration: 0.2 },
+                  transition: { duration: 0.1 },
                 }}
                 whileTap={{ scale: 0.98 }}
                 className={`${getEventColor(event.type)} rounded-lg shadow-sm hover:shadow-md cursor-pointer transition-all duration-300`}

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CalendarIcon, Clock, MapPin, X, Plus, Bell, User } from "lucide-react"
+import { CalendarIcon, Clock, MapPin, X, Plus, Bell, User, CalendarClockIcon } from "lucide-react"
 import { format, addMinutes } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CalendarEvent, Collaborator, Patient } from "../../types/calendar"
+import { TabsContent } from "@radix-ui/react-tabs"
 
 interface EventModalProps {
   isOpen: boolean
@@ -134,7 +135,7 @@ export function EventModal({
 
         <div className="p-4 pt-2">
           <Tabs defaultValue="event" value={eventType} onValueChange={(value) => setEventType(value as any)}>
-            <TabsList className="grid grid-cols-3 mb-4">
+            <TabsList className="grid grid-cols-3 mb-4 w-full gap-2">
               <TabsTrigger value="event">Evento</TabsTrigger>
               <TabsTrigger value="reminder">Lembrete</TabsTrigger>
               <TabsTrigger value="task">Tarefa</TabsTrigger>
@@ -148,7 +149,7 @@ export function EventModal({
             />
 
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-6 w-6 rounded-full bg-orange-400 flex-shrink-0" />
+              <CalendarClockIcon size={28} className="text-muted-foreground" />
               <div className="flex flex-col text-sm">
                 <div className="flex items-center">{format(startDate, "EEEE, d 'de' MMMM", { locale: ptBR })}</div>
                 <div className="flex items-center text-muted-foreground">
@@ -299,14 +300,14 @@ export function EventModal({
                       <span>Adicionar pessoas</span>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-64 p-2" align="start">
-                    <div className="space-y-2">
+                  <PopoverContent className="w-64 p-2 bg-background" align="start">
+                    <div className="space-y-2 ">
                       <Input placeholder="Buscar colaboradores" className="mb-2" />
                       <div className="max-h-48 overflow-y-auto space-y-1">
                         {collaborators.map((collaborator) => (
                           <div
                             key={collaborator.id}
-                            className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                            className="flex items-center gap-2 p-2 hover:bg-primary/50 rounded cursor-pointer"
                             onClick={() => addCollaborator(collaborator)}
                           >
                             <Avatar className="h-6 w-6">
@@ -337,14 +338,14 @@ export function EventModal({
                       <span>Adicionar paciente</span>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-64 p-2" align="start">
-                    <div className="space-y-2">
+                  <PopoverContent className="w-64 p-2 bg-background" align="start">
+                    <div className="space-y-2 ">
                       <Input placeholder="Buscar pacientes" className="mb-2" />
-                      <div className="max-h-48 overflow-y-auto space-y-1">
+                      <div className="max-h-52 overflow-y-auto scroll-auto space-y-1">
                         {patients.map((patient) => (
                           <div
                             key={patient.id}
-                            className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                            className="flex items-center gap-2 p-2 hover:bg-primary/50 rounded cursor-pointer"
                             onClick={() => selectPatient(patient)}
                           >
                             <Avatar className="h-6 w-6">
@@ -368,7 +369,7 @@ export function EventModal({
                   </PopoverContent>
                 </Popover>
 
-                <Popover>
+                {/* <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
@@ -382,9 +383,9 @@ export function EventModal({
                       onChange={(e) => setLocation(e.target.value)}
                     />
                   </PopoverContent>
-                </Popover>
+                </Popover> */}
 
-                <Popover>
+                {/* <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="flex items-center gap-1">
                       <Bell className="h-4 w-4" />
@@ -409,7 +410,7 @@ export function EventModal({
                       </SelectContent>
                     </Select>
                   </PopoverContent>
-                </Popover>
+                </Popover> */}
               </div>
 
               {selectedCollaborators.length > 0 && (
@@ -419,7 +420,7 @@ export function EventModal({
                     {selectedCollaborators.map((collaborator) => (
                       <div
                         key={collaborator.id}
-                        className="flex items-center gap-1 bg-gray-100 rounded-full pl-1 pr-2 py-1"
+                        className="flex items-center gap-1 bg-primary/50 rounded-full pl-1 pr-2 py-1"
                       >
                         <Avatar className="h-5 w-5">
                           <AvatarImage src={collaborator.avatar} alt={collaborator.name} />
@@ -449,7 +450,7 @@ export function EventModal({
               {selectedPatient && (
                 <div className="mt-4">
                   <h4 className="text-sm font-medium">Paciente</h4>
-                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md mt-1">
+                  <div className="flex items-center justify-between p-2 bg-secondary/50 rounded-md mt-1">
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
                         <AvatarImage src={selectedPatient.avatar} alt={selectedPatient.name} />
@@ -478,7 +479,7 @@ export function EventModal({
               {location && (
                 <div className="mt-4">
                   <h4 className="text-sm font-medium">Localização</h4>
-                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-md mt-1">
+                  <div className="flex items-center justify-between p-2 bg-secondary/50 rounded-md mt-1">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">{location}</span>
